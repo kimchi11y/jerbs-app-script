@@ -2,7 +2,10 @@
  * Config.gs — constants only. Change behaviour here without touching logic.
  */
 
-/** Column layout of the job sheet written by the Sheet Capture extension (1-based). */
+/**
+ * Column layout of the job sheet (1-based). Columns 1–7 are written by the
+ * Sheet Capture extension; title and source are added by scraper/ and may be blank.
+ */
 const JOB_COLUMNS = Object.freeze({
   capturedAt: 1,
   url: 2,
@@ -11,11 +14,15 @@ const JOB_COLUMNS = Object.freeze({
   company: 5,
   location: 6,
   description: 7,
+  title: 8,
+  source: 9,
 });
 
 const SHEET_NAMES = Object.freeze({
   results: 'Matches',
   resume: '_Resume', // hidden; holds the resume text in A1
+  companies: 'Companies',    // careers pages for scraper/ to check
+  scrapeLog: 'Scrape log',   // written by scraper/
 });
 
 const MATCHING = Object.freeze({

@@ -1,0 +1,37 @@
+{
+  "maxNewJobsPerRun": 80,
+
+  "filters": {
+    "maxAgeDays": 30,
+    "includeTitle": [
+      "\\bintern(ship)?s?\\b",
+      "\\bindustrial (training|attachment|placement)\\b",
+      "\\blatihan industri\\b",
+      "\\bpractical (training|trainee|student)\\b"
+    ],
+    "excludeTitle": []
+  },
+
+  "jobstreet": {
+    "enabled": true,
+    "maxPages": 2,
+    "searches": [
+      { "keywords": "software engineer intern", "where": "Kuala Lumpur" },
+      { "keywords": "software engineer intern", "where": "Selangor" }
+    ]
+  },
+
+  "linkedin": {
+    "enabled": true,
+    "maxPages": 2,
+    "searches": [
+      { "keywords": "software engineer intern", "location": "Malaysia", "params": { "f_E": "1" } }
+    ]
+  },
+
+  "companies": {
+    "enabled": true,
+    "sheetTab": "Companies",
+    "extra": []
+  }
+}

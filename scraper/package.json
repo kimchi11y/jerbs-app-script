@@ -1,0 +1,21 @@
+{
+  "name": "jerb-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Finds new jobs on JobStreet, LinkedIn and company careers pages and adds them to the Jerb Matcher sheet.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "scrape": "node --env-file-if-exists=.env src/index.js",
+    "scrape:dry": "node --env-file-if-exists=.env src/index.js --dry-run",
+    "schedule:install": "sh scripts/schedule.sh install",
+    "schedule:remove": "sh scripts/schedule.sh remove"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "entities": "^8.1.0",
+    "google-auth-library": "^11.3.1"
+  }
+}

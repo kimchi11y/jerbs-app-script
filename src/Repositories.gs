@@ -48,7 +48,7 @@ class JobRepository {
   }
 
   candidateSheetNames() {
-    const reserved = [SHEET_NAMES.results, SHEET_NAMES.resume];
+    const reserved = [SHEET_NAMES.results, SHEET_NAMES.resume, SHEET_NAMES.companies, SHEET_NAMES.scrapeLog];
     return this.ss_.getSheets().map(s => s.getName()).filter(n => reserved.indexOf(n) < 0);
   }
 
@@ -66,7 +66,8 @@ class JobRepository {
     const last = sh.getLastRow();
     if (last < 1) return [];
     const c = JOB_COLUMNS;
-    return sh.getRange(1, 1, last, c.description).getValues()
+    const width = Math.max(c.description, Math.min(c.source, sh.getMaxColumns()));
+    return sh.getRange(1, 1, last, width).getValues()
       .map((r, i) => ({ r: r, row: i + 1 }))
       .filter(x => /^https?:\/\//i.test(String(x.r[c.url - 1] || '')) &&
                    String(x.r[c.description - 1] || '').trim().length >= 50)
@@ -81,6 +82,7 @@ class JobRepository {
           workMode: String(x.r[c.workMode - 1] || ''),
           company: String(x.r[c.company - 1] || ''),
           location: String(x.r[c.location - 1] || ''),
+          title: String(x.r[c.title - 1] || ''),
           description: String(x.r[c.description - 1]).trim().slice(0, MATCHING.maxJobDescriptionChars),
         };
       });

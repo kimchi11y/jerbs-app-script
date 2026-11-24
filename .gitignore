@@ -2,3 +2,8 @@
 .clasprc.json
 node_modules/
 .DS_Store
+
+# scraper secrets and local output
+scraper/.env
+scraper/service-account.json
+scraper/logs/

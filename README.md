@@ -15,6 +15,11 @@ using DeepSeek, OpenAI, OpenRouter or Anthropic.
 | `Sidebar.html` | Settings panel |
 | `appsscript.json` | Apps Script manifest |
 
+`scraper/` is a separate Node script that finds jobs on JobStreet, LinkedIn and company
+careers pages and adds them to the job sheet. See `scraper/README.md`. Turn on
+**Job Matcher → Turn on hourly auto-analyze** so new rows get analyzed automatically.
+See `HOW-IT-WORKS.md` for the full flow.
+
 ## One-time setup
 
 1. Install Node.js 22 or newer, then: `npm install -g @google/clasp`

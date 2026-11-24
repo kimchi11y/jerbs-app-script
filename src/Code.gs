@@ -13,7 +13,8 @@
 
 // ------------------------------------------------------------------ Composition root
 
-function createApp_() {
+/** @param {{report:function(string, number=)}=} progress defaults to toasts; triggers pass a logger */
+function createApp_(progress) {
   const ss = SpreadsheetApp.getActive();
   const settings = new SettingsStore(
     PropertiesService.getUserProperties(),
@@ -26,7 +27,7 @@ function createApp_() {
     resume: new ResumeRepository(ss),
     jobs: new JobRepository(ss, settings),
     results: new MatchResultRepository(ss),
-    progress: new ToastProgressReporter(ss),
+    progress: progress || new ToastProgressReporter(ss),
   };
 }
 
@@ -63,6 +64,9 @@ function onOpen() {
     .addItem('Analyze new jobs', 'analyzeNewJobs')
     .addItem('Analyze selected rows', 'analyzeSelectedRows')
     .addItem('Re-analyze all jobs', 'reanalyzeAllJobs')
+    .addSeparator()
+    .addItem('Turn on hourly auto-analyze', 'enableAutoAnalyze')
+    .addItem('Turn off auto-analyze', 'disableAutoAnalyze')
     .addSeparator()
     .addItem('Clear results', 'clearResults')
     .addToUi();
@@ -135,6 +139,46 @@ function runMatching_(app, jobs, label) {
   if (s.remaining) msg += '. ' + s.remaining + ' left — run "Analyze new jobs" again to continue.';
   app.progress.report(msg, 10);
   app.results.activate();
+}
+
+// ------------------------------------------------------------------ Scheduled matching
+
+const AUTO_ANALYZE_HANDLER = 'analyzeNewJobsScheduled';
+
+function enableAutoAnalyze() {
+  removeAutoAnalyzeTriggers_();
+  ScriptApp.newTrigger(AUTO_ANALYZE_HANDLER).timeBased().everyHours(1).create();
+  SpreadsheetApp.getUi().alert('Auto-analyze is on. New jobs on the job sheet are analyzed every hour, ' +
+    'using the provider and model saved in Settings.');
+}
+
+function disableAutoAnalyze() {
+  const removed = removeAutoAnalyzeTriggers_();
+  SpreadsheetApp.getUi().alert(removed ? 'Auto-analyze is off.' : 'Auto-analyze was not on.');
+}
+
+function removeAutoAnalyzeTriggers_() {
+  const mine = ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === AUTO_ANALYZE_HANDLER);
+  mine.forEach(t => ScriptApp.deleteTrigger(t));
+  return mine.length;
+}
+
+/** Time-driven trigger: no UI is available here, so problems go to the execution log. */
+function analyzeNewJobsScheduled() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(0)) return; // the previous run is still going
+  try {
+    const app = createApp_(new LogProgressReporter());
+    const resume = app.resume.get();
+    if (!resume.trim()) { console.warn('No resume saved; skipping.'); return; }
+    const seen = app.results.analyzedKeys();
+    const jobs = app.jobs.findAll().filter(j => !seen.has(j.key));
+    if (!jobs.length) return;
+    const s = createMatchingService_(app).run(jobs, resume);
+    console.log(s.done + ' analyzed, ' + s.failed + ' failed, ' + s.remaining + ' left for the next run.');
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // ------------------------------------------------------------------ Called from Sidebar.html

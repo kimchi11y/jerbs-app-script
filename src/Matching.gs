@@ -39,6 +39,7 @@ class MatchPromptBuilder {
   user_(job, resume) {
     return [
       '## JOB',
+      job.title ? 'Title: ' + job.title : '',
       'Company: ' + job.company,
       'Location: ' + job.location + (job.workMode ? ' (' + job.workMode + ')' : ''),
       'URL: ' + job.url,
@@ -92,6 +93,11 @@ class MatchResultParser {
 class ToastProgressReporter {
   constructor(spreadsheet) { this.ss_ = spreadsheet; }
   report(message, seconds) { this.ss_.toast(message, 'Job Matcher', seconds == null ? -1 : seconds); }
+}
+
+/** Progress for time-driven triggers, where there is no one to show a toast to. */
+class LogProgressReporter {
+  report(message) { console.log(message); }
 }
 
 /** Orchestrates matching a list of jobs; depends only on abstractions. */
